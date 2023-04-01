@@ -1,6 +1,6 @@
 // This example shows how scoped values can be a safe replacement for singletons
 // Here a Logger is installed, and a couple of functions use it, if it exists in the scope 
-#include "scoped.h"
+#include "../include/scoped.h"
 #include <iostream>
 
 using namespace std;
