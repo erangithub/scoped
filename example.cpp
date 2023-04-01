@@ -1,27 +1,34 @@
+// This example shows how scoped values can be a safe replacement for singletons
+// Here a Logger is installed, and a couple of functions use it, if it exists in the scope 
 #include "scoped.h"
 #include <iostream>
-#include <vector>
 
-using ScopedInt = scoped<int, struct ScopedIntTag>;
+using namespace std;
+
+class Logger
+{
+public:
+    void println(const std::string& text) {
+        std::cout << "LOGGER: " << text << std::endl;
+    }
+};
+
+using ScopedLogger = scoped<Logger, struct ScopedLoggerTag>;
 
 void foo()
 {
-    if (auto si = ScopedInt::top()) {
-        std::cout << "Found " << si->value() << std::endl;
-    }
-    if (auto si = ScopedInt::get()) {
-        std::cout << "Top value " << *si << std::endl;
+    if (auto logger = ScopedLogger::get()) {
+        logger->println("Calling from foo");
     }
     else {
-        std::cout << "Not found" << std::endl;
+        std::cout << "No logger found" << std::endl;
     }
 }
 
 int main(int argc, char** argv)
 {
     foo();
-    ScopedInt si(5);
-    std::cout << "Hello" << std::endl;
+    ScopedLogger logger;
     foo();
     return 0;
 }

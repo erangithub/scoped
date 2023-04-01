@@ -6,6 +6,10 @@
 template <class T, class ...Tags> class scoped
 {
 public:
+    scoped() : m_next(s_top) {
+        s_top = this;
+    }
+
     scoped(const T& data) : m_value(data), m_next(s_top) {
         s_top = this;
     }
