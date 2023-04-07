@@ -7,7 +7,7 @@ template <class T, class ...Tags> class scoped
 {
 public:
     template <class... Args>
-    scoped(Args&&... args) : m_value{std::forward<Args>(args)...}, m_next(s_top) {
+    explicit scoped(Args&&... args) : m_value{std::forward<Args>(args)...}, m_next(s_top) {
         if (s_bottom == nullptr) s_bottom = this;
         s_top = this;
         if (m_next) m_next->m_prev = this;
