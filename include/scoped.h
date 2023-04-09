@@ -32,9 +32,13 @@ public:
     static T* get() { return s_top ? &(s_top->m_value) : nullptr; }
 
 private:
-    static void * operator new(std::size_t) = delete;
-    static void * operator new [] (std::size_t) = delete;
-
+    
+    // Although this doesn't really prevent creation on the heap, it raises the bar a little.
+    void* operator new(size_t) = delete;          // standard new
+    void* operator new[](size_t) = delete;        // array new
+    void* operator new(size_t, void*) = delete;   // placement new
+    void* operator new[](size_t, void*) = delete; // placement array new
+    
     T m_value;
     scoped* m_next;
     scoped* m_prev;
