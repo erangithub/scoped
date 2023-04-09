@@ -34,10 +34,10 @@ public:
 private:
     
     // Although this doesn't really prevent creation on the heap, it raises the bar a little.
-    void* operator new(size_t) = delete;          // standard new
-    void* operator new[](size_t) = delete;        // array new
-    void* operator new(size_t, void*) = delete;   // placement new
-    void* operator new[](size_t, void*) = delete; // placement array new
+    static void* operator new(size_t) = delete;          // standard new
+    static void* operator new[](size_t) = delete;        // array new
+    static void* operator new(size_t, void*) = delete;   // placement new
+    static void* operator new[](size_t, void*) = delete; // placement array new
     
     T m_value;
     scoped* m_next;
