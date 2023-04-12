@@ -1,3 +1,6 @@
+// This example demonstrates how the scoped template can be used to create a cache for 
+// prime numbers. This allows the user to control exactly when the cache is cleaned.
+
 #include "../include/scoped.h"
 #include <unordered_map>
 #include <vector>
