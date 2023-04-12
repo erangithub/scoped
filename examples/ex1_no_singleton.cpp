@@ -1,6 +1,30 @@
-// This example shows how scoped values can be used instead of singletons
-// The main benefit is that that the object lifetime is controlled explicitely.
-// Here a Logger is installed, and the function "foo" uses it, if it exists in the scope 
+/*
+The "scoped" template is a useful tool for managing resources that have a limited scope,
+and can replace the use of singletons in some cases.
+
+Traditionally, singletons are used to provide a global point of access to a single instance of
+a class. However, singletons can be difficult to test and maintain, since they have a global
+state that can be accessed from anywhere in the code. Additionally, singletons can cause
+issues with multithreading if not properly synchronized.
+
+The "scoped" template provides a way to manage resources with a limited scope, such as
+a Logger object that is only needed within a certain section of code. By using "scoped",
+you can ensure that the resource is properly constructed and destructed within the scope,
+and can safely assume that it is not being accessed by other parts of the code outside
+that scope.
+
+Using "scoped" instead of a singleton provides several benefits, including:
+
+Encapsulation: The resource is encapsulated within the scope where it is needed, and 
+is not accessible outside that scope.
+
+Testability: Since the resource is created and destroyed within a limited scope, it is
+easier to write tests that verify its behavior.
+
+Thread safety: The resource is only accessible within the scope where it is created, so 
+there are no issues with concurrent access or synchronization.
+*/
+
 #include "../include/scoped.h"
 
 #include <iostream>
