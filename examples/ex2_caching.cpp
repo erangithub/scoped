@@ -3,13 +3,17 @@
 #include <vector>
 #include <iostream>
 
-using ScopedCache = scoped<std::unordered_map<int, bool>, struct ScopedCacheTag>;
+// Create a new scoped cache for caching prime numbers
+using ScopedPrimeCache = scoped<std::unordered_map<int, bool>, struct ScopedPrimeCacheTag>;
 
+// Check if a given number is a prime number
 bool is_prime(int n) {
     if (n < 2) return false;
 
-    auto pCache = ScopedCache::get();
+    // Retrieve the prime number cache from the current scope
+    auto pCache = ScopedPrimeCache::get();
     
+    // If previously cached, return the result
     if (pCache) {
         if (auto it = pCache->find(n); it != pCache->end()) {
             std::cout << "Cache hit for " << n << std::endl;
@@ -17,6 +21,7 @@ bool is_prime(int n) {
         }
     }
 
+    // Calculate whether the number is prime or not, and cache the result
     bool result = true;
     for (int i=2; i*i <= n; ++i) {
         if (n % i == 0) {
@@ -31,13 +36,14 @@ bool is_prime(int n) {
     return result;
 }
 
+// Find the next prime number greater than a given number
 int next_prime(int n) {
-    auto pCache = ScopedCache::get();
     int k = n+1;
     for (; !is_prime(k); k++);
     return k;
 }
 
+// Find the first n prime numbers
 std::vector<int> first_n_primes(int n) {
     std::vector<int> primes;
     int p = 0;
@@ -50,7 +56,9 @@ std::vector<int> first_n_primes(int n) {
 
 int main()
 {
-    ScopedCache primeCache;
+    // Create a new scoped cache for caching prime numbers
+    ScopedPrimeCache primeCache;
+
     first_n_primes(5);
     for (auto p : first_n_primes(10))
     {
