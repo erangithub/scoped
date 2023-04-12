@@ -43,8 +43,8 @@ using ScopedLogger = scoped<Logger, struct ScopedLoggerTag>;
 
 // A function that prints a message using the Logger, if one exists in the current scope
 void foo() {
-    if (auto logger = ScopedLogger::get()) {
-        logger->println("Calling from foo");
+    if (auto pScopedLogger = ScopedLogger::top()) {
+        pScopedLogger->value().println("Calling from foo");
     }
     else {
         std::cout << "No logger found" << std::endl;

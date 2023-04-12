@@ -70,12 +70,6 @@ public:
         return s_bottom;
     }
 
-    // Returns a pointer to the value being scoped.
-    static T* get()
-    {
-        return s_top ? &(s_top->m_value) : nullptr;
-    }
-
 private:
     // Disable the use of the default new operator, as scoped instances should not be created on the heap.
     static void* operator new(size_t) = delete;          // standard new
