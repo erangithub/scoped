@@ -13,12 +13,13 @@ using ScopedPrimeCache = scoped<std::unordered_map<int, bool>, struct ScopedPrim
 bool is_prime(int n) {
     if (n < 2) return false;
 
-    // Retrieve the prime number cache from the current scope
-    auto pCache = ScopedPrimeCache::get();
+    // Retrieve the prime number cache, taking the bottom (outer) most scope
+    auto pScopedCache = ScopedPrimeCache::bottom();
     
     // If previously cached, return the result
-    if (pCache) {
-        if (auto it = pCache->find(n); it != pCache->end()) {
+    if (pScopedCache) {
+        auto& cache = pScopedCache->value();
+        if (auto it = cache.find(n); it != cache.end()) {
             std::cout << "Cache hit for " << n << std::endl;
             return it->second;
         }
@@ -32,8 +33,8 @@ bool is_prime(int n) {
             break;
         }
     }
-    if (pCache) {
-        (*pCache)[n] = result;
+    if (pScopedCache) {
+        (pScopedCache->value())[n] = result;
     }
     
     return result;
