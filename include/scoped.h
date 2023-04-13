@@ -71,11 +71,14 @@ public:
     }
 
 private:
-    // Disable the use of the default new operator, as scoped instances should not be created on the heap.
+    // Disable the use of the default new and delete operators, as scoped instances should not be created on the heap.
     static void* operator new(size_t) = delete;          // standard new
     static void* operator new[](size_t) = delete;        // array new
     static void* operator new(size_t, void*) = delete;   // placement new
     static void* operator new[](size_t, void*) = delete; // placement array new
+    
+    static void operator delete(void *) = delete;
+    static void operator delete[](void *) = delete;
 
     // The value being scoped.
     T m_value;
