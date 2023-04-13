@@ -1,3 +1,16 @@
 example.dSYM/Contents/Resources/DWARF/example
 example
 examples/example.dSYM/Contents/Info.plist
+examples/ex1_no_singleton
+examples/ex2_caching
+examples/ex3_event_counter
+examples/ex4_decorator
+examples/ex1_no_singleton.dSYM/Contents/Info.plist
+examples/ex1_no_singleton.dSYM/Contents/Resources/DWARF/ex1_no_singleton
+examples/ex2_caching.dSYM/Contents/Info.plist
+examples/ex2_caching.dSYM/Contents/Resources/DWARF/ex2_caching
+examples/ex3_event_counter.dSYM/Contents/Info.plist
+examples/ex3_event_counter.dSYM/Contents/Resources/DWARF/ex3_event_counter
+examples/ex4_decorator.dSYM/Contents/Info.plist
+examples/ex4_decorator.dSYM/Contents/Resources/DWARF/ex4_decorator
+scoped.code-workspace
