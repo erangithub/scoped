@@ -70,6 +70,15 @@ public:
         return s_bottom;
     }
 
+    // Delete the copy constructor, copy assignment operator, move constructor, and move assignment operator
+    // to ensure that scoped objects are not copied or moved to a container that may not preserve the stack order.
+    // This is necessary because the prev and next pointers of the scoped objects will not necessarily point to
+    // objects that are adjacent in the stack order if the objects are copied or moved to a container.
+    scoped(const scoped&) = delete;
+    scoped& operator=(const scoped&) = delete;
+    scoped(scoped&&) = delete;
+    scoped& operator=(scoped&&) = delete;
+
 private:
     // Disable the use of the default new and delete operators, as scoped instances should not be created on the heap.
     static void* operator new(size_t) = delete;          // standard new
