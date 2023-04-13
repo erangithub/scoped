@@ -15,6 +15,9 @@ Author: Eran Talmor 2023, the.eran.talmor@gmail.com
 
 #include <utility>
 
+namespace scoped
+{
+
 // An abstract class template for managing resources within a specific scope.
 template <class T, class ...Tags>
 class abstract_scoped
@@ -115,5 +118,7 @@ private:
 };
 
 template<class T, class ...Tags> using scoped = polymorphic_scoped<T, T, Tags...>;
+
+} // namespace scoped
 
 #endif // _INCLUDE_SCOPED_H_

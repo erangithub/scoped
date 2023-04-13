@@ -37,6 +37,7 @@ public:
 };
 
 // Define aliases for scoped and polymorphic scoped error handlers
+using namespace scoped;
 using ScopedErrorHandler = abstract_scoped<ErrorHandler>;
 using ScopedConsoleErrorHandler = polymorphic_scoped<ConsoleErrorHandler, ErrorHandler>;
 using ScopedThrowingErrorHandler = polymorphic_scoped<ThrowingErrorHandler, ErrorHandler>;

@@ -25,7 +25,7 @@ public:
         std::vector<int> count_ = {0,0,0,0};
     };
 
-    using ScopedCounter = scoped<Counter, struct ScopedCounterTag>;
+    using ScopedCounter = scoped::scoped<Counter, struct ScopedCounterTag>;
 
     Calculator() : result_(0.0) {}
     void add(double x) {

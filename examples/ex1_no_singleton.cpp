@@ -39,7 +39,7 @@ public:
 };
 
 // Define a scoped type for the Logger class, using a tag type to avoid naming collisions
-using ScopedLogger = scoped<Logger, struct ScopedLoggerTag>;
+using ScopedLogger = scoped::scoped<Logger, struct ScopedLoggerTag>;
 
 // A function that prints a message using the Logger, if one exists in the current scope
 void foo() {

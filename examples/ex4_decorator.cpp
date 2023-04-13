@@ -44,6 +44,7 @@ public:
     }
 };
 
+using namespace scoped;
 using ScopedDecorator = abstract_scoped<TextDecorator>;
 using ScopedUpperCaseDecorator = polymorphic_scoped<UpperCaseDecorator, TextDecorator>;
 using ScopedIndentDecorator = polymorphic_scoped<IndentDecorator, TextDecorator>;

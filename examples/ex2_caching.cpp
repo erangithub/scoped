@@ -7,7 +7,7 @@
 #include <iostream>
 
 // Create a new scoped cache for caching prime numbers
-using ScopedPrimeCache = scoped<std::unordered_map<int, bool>, struct ScopedPrimeCacheTag>;
+using ScopedPrimeCache = scoped::scoped<std::unordered_map<int, bool>, struct ScopedPrimeCacheTag>;
 
 // Check if a given number is a prime number
 bool is_prime(int n) {
