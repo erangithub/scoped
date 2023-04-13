@@ -15,25 +15,21 @@ Author: Eran Talmor 2023, the.eran.talmor@gmail.com
 
 #include <utility>
 
-// A class template for managing resources within a specific scope.
+// An abstract class template for managing resources within a specific scope.
 template <class T, class ...Tags>
-class scoped
+class abstract_scoped
 {
 public:
-    // Constructor that initializes the value being scoped with any number of arguments.
-    template <class... Args>
-    explicit scoped(Args&&... args) :
-        m_value{std::forward<Args>(args)...},
-        m_next(s_top)
+    // Constructor that adds the current instance to the top of the linked list of instances.
+    explicit abstract_scoped() : m_next(s_top)
     {
-        // Add the current instance to the top of the linked list of instances.
         if (s_bottom == nullptr) s_bottom = this;
         s_top = this;
         if (m_next) m_next->m_prev = this;
     }
 
     // Destructor that removes the current instance from the top of linked list of instances.
-    ~scoped()
+    ~abstract_scoped()
     {
         if (m_next) m_next->m_prev = nullptr;
         s_top = m_next;
@@ -41,31 +37,28 @@ public:
     }
 
     // Returns a reference to the value being scoped.
-    T& value()
-    {
-        return m_value;
-    }
+    virtual T& value() = 0;
 
     // Returns a pointer to the next instance of the scoped class in the linked list of instances.
-    scoped* next()
+    abstract_scoped* next()
     {
         return m_next;
     }
 
     // Returns a pointer to the previous instance of the scoped class in the linked list of instances.
-    scoped* prev()
+    abstract_scoped* prev()
     {
         return m_prev;
     }
 
     // Returns a pointer to the top instance of the scoped class in the linked list of instances.
-    static scoped* top()
+    static abstract_scoped* top()
     {
         return s_top;
     }
 
     // Returns a pointer to the bottom instance of the scoped class in the linked list of instances.
-    static scoped* bottom()
+    static abstract_scoped* bottom()
     {
         return s_bottom;
     }
@@ -74,12 +67,11 @@ public:
     // to ensure that scoped objects are not copied or moved to a container that may not preserve the stack order.
     // This is necessary because the prev and next pointers of the scoped objects will not necessarily point to
     // objects that are adjacent in the stack order if the objects are copied or moved to a container.
-    scoped(const scoped&) = delete;
-    scoped& operator=(const scoped&) = delete;
-    scoped(scoped&&) = delete;
-    scoped& operator=(scoped&&) = delete;
+    abstract_scoped(const abstract_scoped&) = delete;
+    abstract_scoped& operator=(const abstract_scoped&) = delete;
+    abstract_scoped(abstract_scoped&&) = delete;
+    abstract_scoped& operator=(abstract_scoped&&) = delete;
 
-private:
     // Disable the use of the default new and delete operators, as scoped instances should not be created on the heap.
     static void* operator new(size_t) = delete;          // standard new
     static void* operator new[](size_t) = delete;        // array new
@@ -89,23 +81,39 @@ private:
     static void operator delete(void *) = delete;
     static void operator delete[](void *) = delete;
 
-    // The value being scoped.
-    T m_value;
-
+private:
     // Pointers to the next and previous instances of the scoped class in the linked list of instances.
-    scoped* m_next;
-    scoped* m_prev;
+    abstract_scoped* m_next;
+    abstract_scoped* m_prev;
 
     // Thread-local storage for the top and bottom instances of the scoped class in the linked list of instances.
-    static thread_local scoped* s_top;
-    static thread_local scoped* s_bottom;
+    static thread_local abstract_scoped* s_top;
+    static thread_local abstract_scoped* s_bottom;
 };
 
 // Define the thread-local storage for the top and bottom instances of the scoped class in the linked list of instances.
 template<class T, class ...Tags>
-thread_local scoped<T, Tags...>* scoped<T, Tags...>::s_top;
+thread_local abstract_scoped<T, Tags...>* abstract_scoped<T, Tags...>::s_top;
 
 template<class T, class ...Tags>
-thread_local scoped<T, Tags...>* scoped<T, Tags...>::s_bottom;
+thread_local abstract_scoped<T, Tags...>* abstract_scoped<T, Tags...>::s_bottom;
+
+// A class template for scoping values of type T, while interfacing them with the abstract scope for T's base class B.
+template<class T, class B, class ...Tags> class polymorphic_scoped : public abstract_scoped<B, Tags...>
+{
+public:
+    using Base = abstract_scoped<B, Tags...>;
+
+    // Constructor that initializes the value being scoped with any number of arguments.
+    template <class... Args>
+    explicit polymorphic_scoped(Args&&... args) : Base(), m_value{std::forward<Args>(args)...}
+    {}
+    
+    B& value() override { return m_value; }
+private:
+    T m_value;
+};
+
+template<class T, class ...Tags> using scoped = polymorphic_scoped<T, T, Tags...>;
 
 #endif // _INCLUDE_SCOPED_H_

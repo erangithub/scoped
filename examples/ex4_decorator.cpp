@@ -44,18 +44,16 @@ public:
     }
 };
 
-using ScopedDecorator = scoped<std::unique_ptr<TextDecorator>>;
-
-template <class D, class... Args> ScopedDecorator makeScopedDecorator(Args&&... args) {
-    return ScopedDecorator(std::make_unique<D>(std::forward<Args>(args)...));
-}
+using ScopedDecorator = abstract_scoped<TextDecorator>;
+using ScopedUpperCaseDecorator = polymorphic_scoped<UpperCaseDecorator, TextDecorator>;
+using ScopedIndentDecorator = polymorphic_scoped<IndentDecorator, TextDecorator>;
 
 // Define a logging function that uses scoped<> to apply the decorators
 void log(const std::string& message) {
     // Use the Scoped<> type to apply the decorators to the message
     std::string decoratedMessage = message;
     for (auto pScope = ScopedDecorator::top(); pScope; pScope = pScope->next()) {
-        decoratedMessage = pScope->value()->apply(decoratedMessage);
+        decoratedMessage = pScope->value().apply(decoratedMessage);
     }
 
     // Synchronize access to the standard output and print the decorated message
@@ -65,7 +63,7 @@ void log(const std::string& message) {
 }
 
 void threadFunc1() {
-    auto upper = makeScopedDecorator<UpperCaseDecorator>();
+    ScopedUpperCaseDecorator upper;
     for (int i = 0; i < 5; ++i) {
         log("Thread 1: This message is upper case");
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -73,8 +71,8 @@ void threadFunc1() {
 }
 
 void threadFunc2() {
-    auto indent = makeScopedDecorator<IndentDecorator>();
-    auto uppercase = makeScopedDecorator<UpperCaseDecorator>();
+    ScopedIndentDecorator indent;
+    ScopedUpperCaseDecorator upper;
     for (int i = 0; i < 5; ++i) {
         log("Thread 2: This message is upper case\nand indented");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
