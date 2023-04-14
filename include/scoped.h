@@ -14,6 +14,7 @@ Author: Eran Talmor 2023, the.eran.talmor@gmail.com
 #define _INCLUDE_SCOPED_H_
 
 #include <utility>
+#include <cassert>
 
 namespace scoped
 {
@@ -24,16 +25,20 @@ class abstract_scoped
 {
 public:
     // Constructor that adds the current instance to the top of the linked list of instances.
-    explicit abstract_scoped() : m_next(s_top)
+    explicit abstract_scoped() : m_next(s_top), m_prev(nullptr)
     {
         if (s_bottom == nullptr) s_bottom = this;
         s_top = this;
-        if (m_next) m_next->m_prev = this;
+        if (m_next) {
+            assert(m_next->m_prev == nullptr);
+            m_next->m_prev = this;
+        }
     }
 
     // Destructor that removes the current instance from the top of linked list of instances.
     ~abstract_scoped()
     {
+        assert(m_prev == nullptr);
         if (m_next) m_next->m_prev = nullptr;
         s_top = m_next;
         if (s_bottom == this) s_bottom = nullptr;
@@ -96,10 +101,10 @@ private:
 
 // Define the thread-local storage for the top and bottom instances of the scoped class in the linked list of instances.
 template<class T, class ...Tags>
-thread_local abstract_scoped<T, Tags...>* abstract_scoped<T, Tags...>::s_top;
+thread_local abstract_scoped<T, Tags...>* abstract_scoped<T, Tags...>::s_top = nullptr;
 
 template<class T, class ...Tags>
-thread_local abstract_scoped<T, Tags...>* abstract_scoped<T, Tags...>::s_bottom;
+thread_local abstract_scoped<T, Tags...>* abstract_scoped<T, Tags...>::s_bottom = nullptr;
 
 // A class template for scoping values of type T, while interfacing them with the abstract scope for T's base class B.
 template<class T, class B, class ...Tags> class polymorphic_scoped : public abstract_scoped<B, Tags...>
