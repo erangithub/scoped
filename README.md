@@ -117,8 +117,11 @@ Dependency Injection: The dependency injection example demonstrates how Scoped c
 A calculator uses a scoped error handler to handle division by zero errors. One error handler prints to the console, 
 while another throws an exception.
 
+# Code of Conduct
+Please read [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
+
 # Contributing
-Please read [CONTRIBUTING](CONTRIBUTING.md) for details on the code of conduct, and the process for submitting pull requests.
+Please read [CONTRIBUTING](CONTRIBUTING.md) for the process for submitting pull requests.
 
 # License
 Scoped is licensed under the MIT license. See LICENSE for more information.
