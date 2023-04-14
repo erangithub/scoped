@@ -22,9 +22,12 @@ void print_number(int x) {
 }
 
 int main() {
-    ScopedThreshold scoped_threshold{4};
-    
-    print_number(3);   // Expected: The number is 3
-    print_number(10);  // Expected: The number is BIG
+    {
+        ScopedThreshold scoped_threshold{4};
+        
+        print_number(3);   // Expected: The number is 3
+        print_number(10);  // Expected: The number is BIG
+    }
+    print_number(10);  // Expected: The number is 10
     return 0;
 }
