@@ -25,15 +25,52 @@ class abstract_scoped
 {
 public:
     // Constructor that adds the current instance to the top of the linked list of instances.
-    explicit abstract_scoped() : m_next(s_top), m_prev(nullptr)
+    abstract_scoped()
     {
-        if (s_bottom == nullptr) s_bottom = this;
-        s_top = this;
-        if (m_next) {
-            m_next->m_prev = this;
-        }
+        append();
         assert(check_class_invariant());
         assert(check_instance_invariant());
+    }
+
+    // Copy constructor that adds the current instance to the top of the linked list of instances.
+    // It does not copy the pointers from the other instance.
+    abstract_scoped(const abstract_scoped& other)
+    {
+        append();
+        assert(check_class_invariant());
+        assert(other.check_instance_invariant());
+        assert(check_instance_invariant());
+    }
+
+    // Copy assignement: the pointers have already been setup correctly in the default constructor,
+    // make sure not to override them by copying from other.
+    abstract_scoped& operator=(const abstract_scoped& other)
+    {
+        assert(check_class_invariant());
+        assert(other.check_instance_invariant());
+        assert(check_instance_invariant());
+        return *this;
+    }
+
+    // Move constructor that adds the current instance to the top of the linked list of instances.
+    // It detaches the other instance, and does not copy its pointers.
+    abstract_scoped(abstract_scoped&& other)
+    {
+        append();
+        other.detach();
+        assert(check_class_invariant());
+        assert(check_instance_invariant());
+        assert(other.check_instance_invariant());
+    }
+
+    // Move assignment: the instance is already appended. Just detach the other instance.
+    abstract_scoped& operator=(abstract_scoped&& other)
+    {
+        other.detach();
+        assert(check_class_invariant());
+        assert(check_instance_invariant());
+        assert(other.check_instance_invariant());
+        return *this;
     }
 
     // Destructor that removes the current instance from the linked list of instances.
@@ -42,22 +79,9 @@ public:
     // scoped objects in containers.
     ~abstract_scoped()
     {
-        assert(check_instance_invariant());
-        if (m_next) {
-            m_next->m_prev = m_prev;
-        } else {
-            s_bottom = m_prev;
-        }
-        
-        if (m_prev) {
-            m_prev->m_next = this;
-        } else {
-            s_top = m_next;
-        }
-        m_next = m_prev = nullptr;
-        assert(check_class_invariant());
+        detach();
     }
-
+    
     // Returns a reference to the value being scoped.
     virtual T& value() = 0;
 
@@ -95,21 +119,53 @@ public:
     static void operator delete[](void *) = delete;
 
 private:
-    // Check the invariant of the linked list of instances: Either both s_top and s_bottom are nullptr,
-    // or they are both non-null, and s_top->m_prev and s_bottom->m_next are also null.
-    bool check_class_invariant() {
+    void append()
+    {
+        m_next = s_top;
+        m_prev = nullptr;
+        s_top = this;
+        if (s_bottom == nullptr) {
+            s_bottom = this;
+        }
+        if (m_next) {
+            m_next->m_prev = this;
+        }
+    }
+
+    void detach()
+    {
+        if (m_next) {
+            m_next->m_prev = m_prev;
+        }
+        if (m_prev) {
+            m_prev->m_next = m_next;
+        }
+        if (s_top == this) {
+            s_top = m_next;
+        }
+        if (s_bottom == this) {
+            s_bottom = m_prev;
+        }
+        m_next = m_prev = nullptr;
+    }
+
+    // Check that the s_top and s_bottom are either fully detached, or property attached.
+    bool check_class_invariant() const {
         assert((!s_top) == (!s_bottom));
         assert((!s_top) || (!s_top->m_prev));
         assert((!s_bottom) || (!s_bottom->m_next));
         return true;
     }
 
-    // Check the invariant of the current instance:
-    // - If m_prev is null, this instance must be s_top
-    // - If m_next is null, this instance must be s_bottom
-    bool check_instance_invariant() {
-        assert((!m_prev) == (s_top == this));
-        assert((!m_next) == (s_bottom == this));
+    // Check that this instance is either detached, or property attached.
+    bool check_instance_invariant() const {
+        assert((!m_next) || (m_next->m_prev == this));
+        assert((!m_prev) || (m_prev->m_next == this));
+        assert((s_top != this) || !m_prev);
+        assert((s_bottom != this) || !m_next);
+        assert(m_next || m_prev || ((s_top == this) && (s_bottom == this)) || ((s_top != this) && (s_bottom != this)));
+        assert(!(!m_prev && m_next) || (s_top == this));
+        assert(!(!m_next && m_prev) || (s_bottom == this));
         return true;
     }
 
@@ -137,7 +193,7 @@ public:
 
     // Constructor that initializes the value being scoped with any number of arguments.
     template <class... Args>
-    explicit polymorphic_scoped(Args&&... args) : Base(), m_value{std::forward<Args>(args)...}
+    polymorphic_scoped(Args&&... args) : Base(), m_value{std::forward<Args>(args)...}
     {}
     
     B& value() override { return m_value; }
