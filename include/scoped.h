@@ -80,6 +80,8 @@ public:
     ~abstract_scoped()
     {
         detach();
+        assert(check_class_invariant());
+        assert(check_instance_invariant());
     }
     
     // Returns a reference to the value being scoped.
