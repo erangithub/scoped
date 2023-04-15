@@ -30,18 +30,32 @@ public:
         if (s_bottom == nullptr) s_bottom = this;
         s_top = this;
         if (m_next) {
-            assert(m_next->m_prev == nullptr);
             m_next->m_prev = this;
         }
+        assert(check_class_invariant());
+        assert(check_instance_invariant());
     }
 
-    // Destructor that removes the current instance from the top of linked list of instances.
+    // Destructor that removes the current instance from the linked list of instances.
+    // Removal is properly handled even if the instances are not destructed in the
+    // reverse order of their construction. This allows more flexibility of putting 
+    // scoped objects in containers.
     ~abstract_scoped()
     {
-        assert(m_prev == nullptr);
-        if (m_next) m_next->m_prev = nullptr;
-        s_top = m_next;
-        if (s_bottom == this) s_bottom = nullptr;
+        assert(check_instance_invariant());
+        if (m_next) {
+            m_next->m_prev = m_prev;
+        } else {
+            s_bottom = m_prev;
+        }
+        
+        if (m_prev) {
+            m_prev->m_next = this;
+        } else {
+            s_top = m_next;
+        }
+        m_next = m_prev = nullptr;
+        assert(check_class_invariant());
     }
 
     // Returns a reference to the value being scoped.
@@ -71,15 +85,6 @@ public:
         return s_bottom;
     }
 
-    // Delete the copy constructor, copy assignment operator, move constructor, and move assignment operator
-    // to ensure that scoped objects are not copied or moved to a container that may not preserve the stack order.
-    // This is necessary because the prev and next pointers of the scoped objects will not necessarily point to
-    // objects that are adjacent in the stack order if the objects are copied or moved to a container.
-    abstract_scoped(const abstract_scoped&) = delete;
-    abstract_scoped& operator=(const abstract_scoped&) = delete;
-    abstract_scoped(abstract_scoped&&) = delete;
-    abstract_scoped& operator=(abstract_scoped&&) = delete;
-
     // Disable the use of the default new and delete operators, as scoped instances should not be created on the heap.
     static void* operator new(size_t) = delete;          // standard new
     static void* operator new[](size_t) = delete;        // array new
@@ -90,6 +95,24 @@ public:
     static void operator delete[](void *) = delete;
 
 private:
+    // Check the invariant of the linked list of instances: Either both s_top and s_bottom are nullptr,
+    // or they are both non-null, and s_top->m_prev and s_bottom->m_next are also null.
+    bool check_class_invariant() {
+        assert((!s_top) == (!s_bottom));
+        assert((!s_top) || (!s_top->m_prev));
+        assert((!s_bottom) || (!s_bottom->m_next));
+        return true;
+    }
+
+    // Check the invariant of the current instance:
+    // - If m_prev is null, this instance must be s_top
+    // - If m_next is null, this instance must be s_bottom
+    bool check_instance_invariant() {
+        assert((!m_prev) == (s_top == this));
+        assert((!m_next) == (s_bottom == this));
+        return true;
+    }
+
     // Pointers to the next and previous instances of the scoped class in the linked list of instances.
     abstract_scoped* m_next;
     abstract_scoped* m_prev;
