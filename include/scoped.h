@@ -38,8 +38,8 @@ public:
     {
         append();
         assert(check_class_invariant());
-        assert(other.check_instance_invariant());
         assert(check_instance_invariant());
+        assert(other.check_instance_invariant());
     }
 
     // Copy assignement: the pointers have already been setup correctly in the default constructor,
@@ -47,8 +47,8 @@ public:
     abstract_scoped& operator=(const abstract_scoped& other)
     {
         assert(check_class_invariant());
-        assert(other.check_instance_invariant());
         assert(check_instance_invariant());
+        assert(other.check_instance_invariant());
         return *this;
     }
 
