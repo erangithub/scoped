@@ -17,5 +17,3 @@ foreach (test ${Tests})
     
     add_test(NAME ${test} COMMAND ${test}.exe)
 endforeach()
-
-#add_test(NAME test_vector COMMAND test_vector)
