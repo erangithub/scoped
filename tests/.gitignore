@@ -1,0 +1,17 @@
+*.cmake
+CMakeCache*
+*.tcl
+*.exe
+*.log
+Make*
+*.txt
+*.c
+*.o
+*cache*
+*.make
+*.ts
+*.o.d
+*.bin
+*.marks
+*.swp
+CMakeCXXCompilerId.cpp
