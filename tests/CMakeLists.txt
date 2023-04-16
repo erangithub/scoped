@@ -6,6 +6,7 @@ include_directories(../include)
 
 # Create the test driver list of tests
 set (Tests 
+    test_simple
     test_vector 
     test_move
     test_option
