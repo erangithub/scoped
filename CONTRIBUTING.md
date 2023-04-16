@@ -23,8 +23,14 @@ Thank you for your interest in contributing to Scoped! Contributions are always 
 * Use the scoped:: namespace for all Scoped-related code.
 
 # Testing
-Before submitting a pull request, please make sure that all tests pass. You can run the tests by building the project with 
-the cmake build system and then running the ctest command.
+Before submitting a pull request, please make sure that all tests pass. Using a recent version of cmake (>= 3.0)
+you can run the tests like so:
+```
+cd tests
+cmake .
+make
+make test
+```
 
 # License
 By contributing to Scoped, you agree that your contributions will be licensed under the MIT license, as described in the LICENSE file in the repository.
