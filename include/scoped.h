@@ -19,10 +19,14 @@ Author: Eran Talmor 2023, the.eran.talmor@gmail.com
 namespace scoped
 {
 
+template<class T, class ...Tags> class scoped_haven;
+
 // An abstract class template for managing resources within a specific scope.
 template <class T, class ...Tags>
 class abstract_scoped {
 public:
+    using haven = scoped_haven<T, Tags...>;
+
     // Constructor that adds the current instance to the top of the linked list of instances.
     abstract_scoped() : m_next(nullptr), m_prev(nullptr) {
         insert(s_top);
@@ -70,7 +74,7 @@ public:
     // Removal is properly handled even if the instances are not destructed in the
     // reverse order of their construction. This allows more flexibility of putting 
     // scoped objects in containers.
-    ~abstract_scoped() {
+    virtual ~abstract_scoped() {
         detach();
         assert(check_class_invariant());
         assert(check_instance_invariant());
@@ -78,7 +82,7 @@ public:
     
     // Returns a reference to the value being scoped.
     virtual T& value() = 0;
-
+ 
     // Returns a pointer to the next instance of the scoped class in the linked list of instances.
     // Note: next() goes in the direction from top() to bottom()
     abstract_scoped* next() {
@@ -111,9 +115,6 @@ public:
     static void* operator new[](size_t) = delete;        // array new
     static void* operator new(size_t, void*) = delete;   // placement new
     static void* operator new[](size_t, void*) = delete; // placement array new
-    
-    static void operator delete(void *) = delete;
-    static void operator delete[](void *) = delete;
 
 private:
     void insert(abstract_scoped* above) {
@@ -178,9 +179,11 @@ private:
     abstract_scoped* m_next;
     abstract_scoped* m_prev;
 
-    // Thread-local storage for the top and bottom instances of the scoped class in the linked list of instances.
+    // Thread-local storage for the top and bottom instances of the scoped class in the linked list of instances. 
     static thread_local abstract_scoped* s_top;
     static thread_local abstract_scoped* s_bottom;
+
+    friend haven;
 };
 
 // Define the thread-local storage for the top and bottom instances of the scoped class in the linked list of instances.
@@ -193,19 +196,47 @@ thread_local abstract_scoped<T, Tags...>* abstract_scoped<T, Tags...>::s_bottom 
 // A class template for scoping values of type T, while interfacing them with the abstract scope for T's base class B.
 template<class T, class B, class ...Tags> class polymorphic_scoped : public abstract_scoped<B, Tags...> {
 public:
-    using Base = abstract_scoped<B, Tags...>;
+    using base = abstract_scoped<B, Tags...>;
 
     // Constructor that initializes the value being scoped with any number of arguments.
     template <class... Args>
-    polymorphic_scoped(Args&&... args) : Base(), m_value{std::forward<Args>(args)...}
+    polymorphic_scoped(Args&&... args) : base(), m_value{std::forward<Args>(args)...}
     {}
     
+    // Default contructors, destructor and assignment operators
+    polymorphic_scoped(const polymorphic_scoped& other) = default;
+    polymorphic_scoped(polymorphic_scoped&& other) = default;
+    ~polymorphic_scoped() = default;
+    polymorphic_scoped& operator=(const polymorphic_scoped& other) = default;
+    polymorphic_scoped& operator=(polymorphic_scoped&& other) = default;
+
     B& value() override { return m_value; }
+
 private:
     T m_value;
 };
 
 template<class T, class ...Tags> using scoped = polymorphic_scoped<T, T, Tags...>;
+
+template<class T, class ...Tags> class scoped_haven {
+public:
+    using abstract = abstract_scoped<T, Tags...>;
+
+    scoped_haven() : m_saved_top(abstract::top()),
+                       m_saved_bottom(abstract::bottom()) {
+        abstract::s_top = nullptr;
+        abstract::s_bottom = nullptr;                   
+    }
+
+    ~scoped_haven() {
+        abstract::s_top = m_saved_top;
+        abstract::s_bottom = m_saved_bottom;
+    }
+    
+private:
+    abstract_scoped<T, Tags...>* m_saved_top;
+    abstract_scoped<T, Tags...>* m_saved_bottom;
+};
 
 } // namespace scoped
 

@@ -10,6 +10,7 @@ set (Tests
     test_vector 
     test_move
     test_option
+    test_haven
 )
 
 # Add all the ADD_TEST for each test
