@@ -13,6 +13,7 @@ In this README, we'll cover the features of Scoped and how to use it in your C++
 * When constructed, the `scoped<T>` is pushed to the top of a stack of `scoped<T>` objects. When destructed, it is popped from the stack.
 * The stack of scopes is visible to the entire code within the scope, and can be traversed in both directions.
 * Supports polymorphism for easy dependency injection.
+* Supports dynamic / conditional scoping using e.g. optional / vector stl containers.
 * Eliminates the need for refactoring large APIs by passing many configuration arguments.
 * Eliminates the need to lock shared objects in many cases.
 
