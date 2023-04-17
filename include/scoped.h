@@ -21,22 +21,19 @@ namespace scoped
 
 // An abstract class template for managing resources within a specific scope.
 template <class T, class ...Tags>
-class abstract_scoped
-{
+class abstract_scoped {
 public:
     // Constructor that adds the current instance to the top of the linked list of instances.
-    abstract_scoped()
-    {
-        append();
+    abstract_scoped() : m_next(nullptr), m_prev(nullptr) {
+        insert(s_top);
         assert(check_class_invariant());
         assert(check_instance_invariant());
     }
 
-    // Copy constructor that adds the current instance to the top of the linked list of instances.
-    // It does not copy the pointers from the other instance.
-    abstract_scoped(const abstract_scoped& other)
-    {
-        append();
+    // Copy constructor that adds the current instance right above the other instance.
+    // This helps maintain order stability, e.g. when vector<scoped> is resized.
+    abstract_scoped(const abstract_scoped& other) : m_next(nullptr), m_prev(nullptr) {
+        insert(const_cast<abstract_scoped*>(&other));
         assert(check_class_invariant());
         assert(check_instance_invariant());
         assert(other.check_instance_invariant());
@@ -44,19 +41,16 @@ public:
 
     // Copy assignement: the pointers have already been setup correctly in the default constructor,
     // make sure not to override them by copying from other.
-    abstract_scoped& operator=(const abstract_scoped& other)
-    {
+    abstract_scoped& operator=(const abstract_scoped& other) {
         assert(check_class_invariant());
         assert(check_instance_invariant());
         assert(other.check_instance_invariant());
         return *this;
     }
 
-    // Move constructor that adds the current instance to the top of the linked list of instances.
-    // It detaches the other instance, and does not copy its pointers.
-    abstract_scoped(abstract_scoped&& other)
-    {
-        append();
+    // Move constructor that replaces the current instance in the linked list of instances.
+    abstract_scoped(abstract_scoped&& other) : m_next(nullptr), m_prev(nullptr) {
+        insert(&other);
         other.detach();
         assert(check_class_invariant());
         assert(check_instance_invariant());
@@ -64,8 +58,7 @@ public:
     }
 
     // Move assignment: the instance is already appended. Just detach the other instance.
-    abstract_scoped& operator=(abstract_scoped&& other)
-    {
+    abstract_scoped& operator=(abstract_scoped&& other) {
         other.detach();
         assert(check_class_invariant());
         assert(check_instance_invariant());
@@ -77,8 +70,7 @@ public:
     // Removal is properly handled even if the instances are not destructed in the
     // reverse order of their construction. This allows more flexibility of putting 
     // scoped objects in containers.
-    ~abstract_scoped()
-    {
+    ~abstract_scoped() {
         detach();
         assert(check_class_invariant());
         assert(check_instance_invariant());
@@ -88,27 +80,30 @@ public:
     virtual T& value() = 0;
 
     // Returns a pointer to the next instance of the scoped class in the linked list of instances.
-    abstract_scoped* next()
-    {
+    // Note: next() goes in the direction from top() to bottom()
+    abstract_scoped* next() {
         return m_next;
     }
 
     // Returns a pointer to the previous instance of the scoped class in the linked list of instances.
-    abstract_scoped* prev()
-    {
+    // Note: prev() goes in the direction from bottom() to top()
+    abstract_scoped* prev() {
         return m_prev;
     }
 
     // Returns a pointer to the top instance of the scoped class in the linked list of instances.
-    static abstract_scoped* top()
-    {
+    static abstract_scoped* top() {
         return s_top;
     }
 
     // Returns a pointer to the bottom instance of the scoped class in the linked list of instances.
-    static abstract_scoped* bottom()
-    {
+    static abstract_scoped* bottom() {
         return s_bottom;
+    }
+
+    // Returns whether or not this instance is attached to the linked list of instances
+    bool is_attached() {
+        return m_next || m_prev || (s_top == this) || (s_bottom == this);
     }
 
     // Disable the use of the default new and delete operators, as scoped instances should not be created on the heap.
@@ -121,21 +116,29 @@ public:
     static void operator delete[](void *) = delete;
 
 private:
-    void append()
-    {
-        m_next = s_top;
-        m_prev = nullptr;
-        s_top = this;
-        if (s_bottom == nullptr) {
-            s_bottom = this;
+    void insert(abstract_scoped* above) {
+        assert(!is_attached());
+        if (above && !above->is_attached()) {
+            above = s_top;
+        }
+        m_next = above;
+        m_prev = above ? above->m_prev : s_bottom;
+        if (m_prev) {
+            m_prev->m_next = this;
+        }
+        else {
+            s_top = this;
         }
         if (m_next) {
             m_next->m_prev = this;
         }
+        else {
+            s_bottom = this;
+        }
     }
 
-    void detach()
-    {
+    void detach() {
+        if (!is_attached()) return;
         if (m_next) {
             m_next->m_prev = m_prev;
         }
@@ -188,8 +191,7 @@ template<class T, class ...Tags>
 thread_local abstract_scoped<T, Tags...>* abstract_scoped<T, Tags...>::s_bottom = nullptr;
 
 // A class template for scoping values of type T, while interfacing them with the abstract scope for T's base class B.
-template<class T, class B, class ...Tags> class polymorphic_scoped : public abstract_scoped<B, Tags...>
-{
+template<class T, class B, class ...Tags> class polymorphic_scoped : public abstract_scoped<B, Tags...> {
 public:
     using Base = abstract_scoped<B, Tags...>;
 
