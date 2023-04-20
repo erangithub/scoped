@@ -11,6 +11,7 @@ set (Tests
     test_move
     test_option
     test_haven
+    test_manifest
 )
 
 # Add all the ADD_TEST for each test
