@@ -17,6 +17,7 @@ In this README, we'll cover the features of Scoped and how to use it in your C++
 * Supports protecting a scope from external effects using `scoped<T>::haven`.
 * Eliminates the need for refactoring large APIs by passing many configuration arguments.
 * Eliminates the need to lock shared objects in many cases.
+* Lets you define "manifests" which advertise which scoped<T>'s are relevant to specific functions, classes or methods.
 
 ## Installation
 Scoped is a header-only library and does not require any installation. Simply include the header file scoped.h in your C++ project.

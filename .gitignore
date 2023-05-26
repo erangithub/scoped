@@ -1,2 +1,9 @@
 scoped.code-workspace
 .vscode/*
+tests/*.dSYM
+tests/test_simple
+tests/test_vector
+tests/test_manifest
+tests/test_move
+.gitignore
+compiler_depend.internal
