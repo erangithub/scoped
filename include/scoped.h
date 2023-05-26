@@ -19,13 +19,13 @@ Author: Eran Talmor 2023, the.eran.talmor@gmail.com
 namespace scoped
 {
 
-template<class T, class ...Tags> class scoped_haven;
+template<class T, class ...Tags> class scoped_shield;
 
 // An abstract class template for managing resources within a specific scope.
 template <class T, class ...Tags>
 class abstract_scoped {
 public:
-    using haven = scoped_haven<T, Tags...>;
+    using shield = scoped_shield<T, Tags...>;
 
     // Constructor that adds the current instance to the top of the linked list of instances.
     abstract_scoped() : m_next(nullptr), m_prev(nullptr) {
@@ -183,7 +183,7 @@ private:
     static thread_local abstract_scoped* s_top;
     static thread_local abstract_scoped* s_bottom;
 
-    friend haven;
+    friend shield;
 };
 
 // Define the thread-local storage for the top and bottom instances of the scoped class in the linked list of instances.
@@ -218,17 +218,17 @@ private:
 
 template<class T, class ...Tags> using scoped = polymorphic_scoped<T, T, Tags...>;
 
-template<class T, class ...Tags> class scoped_haven {
+template<class T, class ...Tags> class scoped_shield {
 public:
     using abstract = abstract_scoped<T, Tags...>;
 
-    scoped_haven() : m_saved_top(abstract::top()),
+    scoped_shield() : m_saved_top(abstract::top()),
                        m_saved_bottom(abstract::bottom()) {
         abstract::s_top = nullptr;
         abstract::s_bottom = nullptr;                   
     }
 
-    ~scoped_haven() {
+    ~scoped_shield() {
         abstract::s_top = m_saved_top;
         abstract::s_bottom = m_saved_bottom;
     }

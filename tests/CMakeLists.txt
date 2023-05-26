@@ -10,7 +10,7 @@ set (Tests
     test_vector 
     test_move
     test_option
-    test_haven
+    test_shield
     test_manifest
 )
 
