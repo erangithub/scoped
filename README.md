@@ -130,4 +130,4 @@ Please read [CONTRIBUTING](CONTRIBUTING.md) for the process for submitting pull 
 Scoped is licensed under the MIT license. See LICENSE for more information.
 
 # Author
-Scoped was written by Eran Talmor (the.eran.talmor@gmail.com). If you have any questions or feedback, please don't hesitate to contact me.
+Scoped was written by Eran Talmor (the.eran.talmor@gmail.com, https://www.linkedin.com/in/eran-talmor/). If you have any questions or feedback, please don't hesitate to contact me.
