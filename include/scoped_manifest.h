@@ -39,13 +39,13 @@ int foo() {
 Author: Eran Talmor 2023, the.eran.talmor@gmail.com
 */
 
-template <typename T> using scoped_manifest_of = decltype(__get_scoped_manifest_traits((T*)nullptr));
-template <typename F, F f> struct __scoped_function_type__ {};
+template <typename T> using scoped_manifest_of = decltype(get_scoped_manifest_traits((T*)nullptr));
+template <typename F, F f> struct scoped_function_type {};
 
-#define SCOPED_FUNCTION_TYPE(f) __scoped_function_type__<decltype(&f), &f>
+#define SCOPED_FUNCTION_TYPE(f) scoped_function_type<decltype(&f), &f>
 
-#define SCOPED_DECLARE_CLASS_MANIFEST(Class, Manifest) Manifest __get_scoped_manifest_traits(Class *);
-#define SCOPED_DECLARE_FUNCTION_MANIFEST(Func, Manifest) Manifest __get_scoped_manifest_traits(SCOPED_FUNCTION_TYPE(Func)*);
+#define SCOPED_DECLARE_CLASS_MANIFEST(Class, Manifest) Manifest get_scoped_manifest_traits(Class *);
+#define SCOPED_DECLARE_FUNCTION_MANIFEST(Func, Manifest) Manifest get_scoped_manifest_traits(SCOPED_FUNCTION_TYPE(Func)*);
 
 #define SCOPED_GET_CLASS_MANIFEST(Class) scoped_manifest_of<Class>
 #define SCOPED_GET_OBJECT_MANIFEST(Obj) scoped_manifest_of<decltype(Obj)>
